@@ -57,6 +57,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\LineAndMapGenerator.cs" />
+    <Compile Include="Assets\Movement.cs" />
+    <Compile Include="Assets\CameraController.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

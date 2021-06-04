@@ -12,13 +12,13 @@ public class LineAndMapGenerator : MonoBehaviour
     [SerializeField]
     SpriteShapeController splineObject;
     [SerializeField]
-    float amplitude = 3f;
+    float amplitude = Screen.width/2.5f;
     [SerializeField]
     float pointsXoffset = 3f;
 
-    Vector2 currentPointPos = new Vector2(0f, -6f);
+    Vector2 currentPointPos = new Vector2(0f, -5f);
     int LastPointX;
-    Spline spl = new Spline();
+    public Spline spl = new Spline();
 
     void Start()
     {
