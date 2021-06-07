@@ -5,39 +5,65 @@ using UnityEngine.U2D;
 
 public class Movement : MonoBehaviour
 {
-    [SerializeField]
-    EdgeCollider2D generatorCollider;
+    List<GameObject> generatorCollider = new List<GameObject>();
     [Range(0.0f, 1.0f)]
     public float movementSpeed = 1;
     [SerializeField]
     GameObject point;
+    [SerializeField]
+    LineAndMapGenerator mapGen;
 
     Vector2[] points = new Vector2[0];
+    int currLineId = 0;
     int currPointId = 0;
+    EdgeCollider2D currLineCollider;
 
     void LateUpdate()
     {
-        if (points.Length != generatorCollider.points.Length)
+        Debug.Log(currLineId);
+        if (currLineCollider && points.Length != currLineCollider.points.Length)
         {
-            points = generatorCollider.points;
-            Debug.Log(points.Length);
-            //GenPoints();
+            points = currLineCollider.points;
+            transform.position = currLineCollider.points[0];
         }
 
-        gameObject.transform.position = Vector3.Lerp(transform.position, points[currPointId], Time.deltaTime / (Vector2.Distance(transform.position, points[currPointId]) * movementSpeed));
-
-        if(Vector2.Distance(gameObject.transform.position, points[currPointId]) < 0.2f)
+        if (Input.GetKey(KeyCode.Mouse0))
         {
-            if (currPointId < points.Length - 1) currPointId++;
+            gameObject.transform.position = Vector3.Lerp(transform.position, points[currPointId], Time.deltaTime / (Vector2.Distance(transform.position, points[currPointId]) * movementSpeed));
+
+            if (Vector2.Distance(gameObject.transform.position, points[currPointId]) < 0.1f)
+            {
+                if (currPointId < points.Length - 1)
+                {
+                    currPointId++;
+                }
+                else if(generatorCollider.Count < 3) //koniec pierwszej linii
+                {
+                    currPointId = 0;
+                    currLineId = 1;
+                    points = currLineCollider.points;
+                    //transform.position = currLineCollider.points[0];
+                    mapGen.GeneratePoints(10, new Vector2(0f, 0f));
+                }
+                else //koniec kazdej kolejnej linii
+                {
+                    mapGen.GeneratePoints(10, new Vector2(0f,0f));
+                    currPointId = 0;
+                    points = currLineCollider.points;
+                    //transform.position = currLineCollider.points[0];
+                }
+            }
         }
     }
 
-    /*void GenPoints()
+    public void UpdateLines(GameObject newLine)
     {
-        for (int i = 0; i < points.Length; i++)
+        if (generatorCollider.Count > 2)
         {
-            GameObject objTemp = Instantiate(point);
-            objTemp.transform.position = points[i];
+            Destroy(generatorCollider[0]);
+            generatorCollider.RemoveAt(0);
         }
-    }*/
+        generatorCollider.Add(newLine);
+        currLineCollider = generatorCollider[currLineId].GetComponent<EdgeCollider2D>();
+    }
 }

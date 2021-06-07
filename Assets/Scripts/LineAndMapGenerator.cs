@@ -5,58 +5,69 @@ using UnityEngine.U2D;
 
 public class LineAndMapGenerator : MonoBehaviour
 {
-    //[SerializeField]
-    List<Vector2> positions = new List<Vector2>();
+    [SerializeField]
+    Movement movement;
+
     [SerializeField]
     GameObject pointPrefab;
     [SerializeField]
-    SpriteShapeController splineObject;
+    GameObject linePrefab;
+
     [SerializeField]
     float amplitude = Screen.width/2.5f;
     [SerializeField]
-    float pointsXoffset = 3f;
+    float pointsYoffset = 3f;
+    [SerializeField]
+    int generateCount = 10;
 
-    Vector2 currentPointPos = new Vector2(0f, -5f);
-    int LastPointX;
-    public Spline spl = new Spline();
+    SpriteShapeController splineObject;
+    Vector2 lastPointPosition = new Vector2(0f, 0f);
+    Vector2 refreshPoint = new Vector2();
 
     void Start()
     {
-        spl.isOpenEnded = true;
-        positions.Add(currentPointPos);
-        GeneratePoints(10);
-        //spl = new Spline();
-        foreach (Vector2 pointPos in positions){
-            GameObject pointObject = Instantiate(pointPrefab);
-            pointObject.transform.position = pointPos;
-        }
-        splineObject.spline = spl;
-        //GenerateLine();
+        GeneratePoints(generateCount, new Vector2(0f, -5f), true);
     }
-    public void GeneratePoints(int count, bool removeOldPoints = false)
+    public void GeneratePoints(int count, Vector2 startPos, bool first = false)
     {
-        if (removeOldPoints) positions.RemoveRange(0, count);
+        Vector2 currentPointPos = lastPointPosition;
+
+        GameObject NewLineObject = Instantiate(linePrefab);
+        splineObject = NewLineObject.GetComponent<SpriteShapeController>();
+
+        Spline tempSpline = new Spline();
+        tempSpline.isOpenEnded = true;
+
+        List<Vector2> positions = new List<Vector2>();
+
         for (int i = 0; i < count; i++)
         {
-            currentPointPos = new Vector2(Random.Range(-amplitude, amplitude), currentPointPos.y + pointsXoffset);
+            //GameObject pointObject = Instantiate(pointPrefab);
+            //pointObject.transform.position = currentPointPos;
+
             positions.Add(currentPointPos);
             Vector3 currPointPosV3 = new Vector3(currentPointPos.x, currentPointPos.y);
-            spl.InsertPointAt(i, currPointPosV3);
-            spl.SetTangentMode(i, ShapeTangentMode.Continuous);
-            spl.SetLeftTangent(i, new Vector3(0f,-4f));
-            spl.SetRightTangent(i, new Vector3(0f, 4f));
+            tempSpline.InsertPointAt(i, currPointPosV3);
+            tempSpline.SetTangentMode(i, ShapeTangentMode.Continuous);
+            tempSpline.SetLeftTangent(i, new Vector3(0f, -4f));
+            tempSpline.SetRightTangent(i, new Vector3(0f, 4f));
+
+            lastPointPosition = currentPointPos;
+            currentPointPos = new Vector2(Random.Range(-amplitude, amplitude), currentPointPos.y + pointsYoffset);
         }
-    }
 
-    /*void GenerateLine()
-    {
-        LineRenderer lineRenderer = LineObj.GetComponent<LineRenderer>();
+        splineObject.spline = tempSpline;
+        refreshPoint = positions[positions.Count / 2];
 
-        lineRenderer.positionCount = positions.Count;
-
-        for (int i = 0; i < positions.Count; i++)
+        if (first)
         {
-            lineRenderer.SetPosition(i, new Vector3(positions[i].x, positions[i].y, 0f));
+            movement.UpdateLines(NewLineObject);
+            GeneratePoints(10, lastPointPosition);
         }
-    }*/
+        else
+        {
+            movement.UpdateLines(NewLineObject);
+        }
+
+    }
 }
