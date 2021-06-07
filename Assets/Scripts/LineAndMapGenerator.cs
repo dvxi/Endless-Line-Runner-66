@@ -9,7 +9,7 @@ public class LineAndMapGenerator : MonoBehaviour
     Movement movement;
 
     [SerializeField]
-    GameObject pointPrefab;
+    GameObject coinPrefab;
     [SerializeField]
     GameObject linePrefab;
 
@@ -42,8 +42,11 @@ public class LineAndMapGenerator : MonoBehaviour
 
         for (int i = 0; i < count; i++)
         {
-            //GameObject pointObject = Instantiate(pointPrefab);
-            //pointObject.transform.position = currentPointPos;
+            if (Random.Range(0, 1f) < .2f)
+            {
+                GameObject pointObject = Instantiate(coinPrefab);
+                pointObject.transform.position = currentPointPos;
+            }
 
             positions.Add(currentPointPos);
             Vector3 currPointPosV3 = new Vector3(currentPointPos.x, currentPointPos.y);

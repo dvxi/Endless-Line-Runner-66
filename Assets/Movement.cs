@@ -18,6 +18,12 @@ public class Movement : MonoBehaviour
     int currPointId = 0;
     EdgeCollider2D currLineCollider;
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        Debug.Log(collision);
+        if (collision.tag == "coin") Destroy(collision.gameObject);
+    }
+
     void LateUpdate()
     {
         Debug.Log(currLineId);
