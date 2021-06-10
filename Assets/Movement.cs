@@ -2,32 +2,62 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.U2D;
+using UnityEngine.UI;
 
 public class Movement : MonoBehaviour
 {
-    List<GameObject> generatorCollider = new List<GameObject>();
     [Range(0.0f, 1.0f)]
     public float movementSpeed = 1;
+    [Range(0.0f, 10.0f)]
+    public float cooldownTime = 3f;
+
+    [SerializeField]
+    Slider cooldownSlider;
+    [SerializeField]
+    LineAndMapGenerator mapGen;
+    [SerializeField]
+    Rigidbody2D rb2d;
     [SerializeField]
     GameObject point;
     [SerializeField]
-    LineAndMapGenerator mapGen;
+    GameObject swordObject;
+
+    List<GameObject> generatorCollider = new List<GameObject>();
+    EdgeCollider2D currLineCollider;
+
+    Animator anim;
 
     Vector2[] points = new Vector2[0];
-    int currLineId = 0;
+    Vector2 prevPos = new Vector2(0,0);
+
+    int currLineId = 1;
     int currPointId = 0;
-    EdgeCollider2D currLineCollider;
+    float cooldownValue = 0;
+
+    private void Start()
+    {
+        anim = swordObject.transform.GetChild(0).GetComponent<Animator>();
+    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log(collision);
         if (collision.tag == "coin") Destroy(collision.gameObject);
     }
 
     void LateUpdate()
     {
-        Debug.Log(currLineId);
-        if (currLineCollider && points.Length != currLineCollider.points.Length)
+        //Debug.Log(currLineCollider.points.Length);
+
+        float angle = Vector2.Angle(new Vector2(0f, -1f), prevPos - new Vector2(transform.position.x, transform.position.y));
+        int direction = 0;
+
+        if (prevPos.x - transform.position.x > 0) direction = 1;
+        else direction = -1;
+
+        swordObject.transform.rotation = Quaternion.Lerp(swordObject.transform.rotation, Quaternion.Euler(0f, 0f, direction * angle), Time.deltaTime * 12f);
+        prevPos = transform.position;
+
+        if (currLineCollider && points.Length != currLineCollider.pointCount)
         {
             points = currLineCollider.points;
             transform.position = currLineCollider.points[0];
@@ -45,21 +75,39 @@ public class Movement : MonoBehaviour
                 }
                 else if(generatorCollider.Count < 3) //koniec pierwszej linii
                 {
+                    Debug.Log("1st end");
                     currPointId = 0;
                     currLineId = 1;
                     points = currLineCollider.points;
                     //transform.position = currLineCollider.points[0];
-                    mapGen.GeneratePoints(10, new Vector2(0f, 0f));
+                    mapGen.GeneratePoints();
                 }
                 else //koniec kazdej kolejnej linii
                 {
-                    mapGen.GeneratePoints(10, new Vector2(0f,0f));
+                    Debug.Log("end");
+                    mapGen.GeneratePoints();
                     currPointId = 0;
                     points = currLineCollider.points;
                     //transform.position = currLineCollider.points[0];
                 }
             }
+
+            SwordHandle(true);
+            //return;
         }
+
+        if (Input.GetKeyUp(KeyCode.Mouse0))
+        {
+            Debug.Log("value: " + cooldownValue);
+
+            if (cooldownValue >= .98f)
+            {
+                anim.Play("Hit");
+                cooldownValue = 0;
+            }
+        }
+
+        SwordHandle(false);
     }
 
     public void UpdateLines(GameObject newLine)
@@ -70,6 +118,23 @@ public class Movement : MonoBehaviour
             generatorCollider.RemoveAt(0);
         }
         generatorCollider.Add(newLine);
-        currLineCollider = generatorCollider[currLineId].GetComponent<EdgeCollider2D>();
+        if(generatorCollider.Count > 1) currLineCollider = generatorCollider[currLineId].GetComponent<EdgeCollider2D>();
+
+        //Debug.Log(generatorCollider[currLineId].name + " | " + currLineCollider.pointCount);
+    }
+
+    public void SwordHandle(bool raise)
+    {
+        if (raise)
+        {
+            cooldownValue += Time.deltaTime / cooldownTime;
+            cooldownValue = Mathf.Clamp(cooldownValue, 0, 1f);
+            cooldownSlider.value = cooldownValue;
+        } else
+        {
+            cooldownValue -= Time.deltaTime / (cooldownTime * 3);
+            cooldownValue = Mathf.Clamp(cooldownValue, 0, 1f);
+            cooldownSlider.value = cooldownValue;
+        }
     }
 }

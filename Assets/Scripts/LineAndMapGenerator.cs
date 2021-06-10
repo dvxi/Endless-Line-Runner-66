@@ -21,14 +21,14 @@ public class LineAndMapGenerator : MonoBehaviour
     int generateCount = 10;
 
     SpriteShapeController splineObject;
-    Vector2 lastPointPosition = new Vector2(0f, 0f);
+    Vector2 lastPointPosition = new Vector2(0f, -60f);
     Vector2 refreshPoint = new Vector2();
 
     void Start()
     {
-        GeneratePoints(generateCount, new Vector2(0f, -5f), true);
+        GeneratePoints(10, true);
     }
-    public void GeneratePoints(int count, Vector2 startPos, bool first = false)
+    public void GeneratePoints(int count = 10, bool first = false)
     {
         Vector2 currentPointPos = lastPointPosition;
 
@@ -64,8 +64,10 @@ public class LineAndMapGenerator : MonoBehaviour
 
         if (first)
         {
+            NewLineObject.SetActive(false);
             movement.UpdateLines(NewLineObject);
-            GeneratePoints(10, lastPointPosition);
+            GeneratePoints();
+            GeneratePoints();
         }
         else
         {
