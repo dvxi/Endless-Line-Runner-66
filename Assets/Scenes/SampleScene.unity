@@ -419,7 +419,7 @@ MonoBehaviour:
   movement: {fileID: 1518151949}
   coinPrefab: {fileID: 6283969947547255484, guid: 2f11cffcd82724e4fab5c6c3c66c6337, type: 3}
   linePrefab: {fileID: 7531394368296401949, guid: 6b17441e2109e9e4cb031fdedb0ceb08, type: 3}
-  enemyPrefab: {fileID: 6283969947547255484, guid: 2f11cffcd82724e4fab5c6c3c66c6337, type: 3}
+  enemyPrefab: {fileID: 4076769519370467957, guid: b09de0b496fc8a346b18ab18ad2f7e49, type: 3}
   amplitude: 5.66
   pointsYoffset: 7
   generateCount: 10
