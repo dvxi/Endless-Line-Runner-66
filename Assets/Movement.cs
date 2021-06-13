@@ -22,7 +22,7 @@ public class Movement : MonoBehaviour
     [SerializeField]
     GameObject swordObject;
 
-    List<GameObject> generatorCollider = new List<GameObject>();
+    public List<GameObject> generatorCollider = new List<GameObject>();
     EdgeCollider2D currLineCollider;
 
     Animator anim;
@@ -33,6 +33,7 @@ public class Movement : MonoBehaviour
     int currLineId = 1;
     int currPointId = 0;
     float cooldownValue = 0;
+    int failedTries = 0;
 
     private void Start()
     {
@@ -57,44 +58,55 @@ public class Movement : MonoBehaviour
         swordObject.transform.rotation = Quaternion.Lerp(swordObject.transform.rotation, Quaternion.Euler(0f, 0f, direction * angle), Time.deltaTime * 12f);
         prevPos = transform.position;
 
-        if (currLineCollider && points.Length != currLineCollider.pointCount)
+
+        Debug.Log("lateupdate: " + currLineCollider.pointCount + " id: " + currLineId + " count: " + generatorCollider.Count);
+        //if (currLineCollider && points.Length != currLineCollider.pointCount)
+        if (currLineCollider && currLineCollider.pointCount > 10 && points.Length < 10)
         {
+            Debug.Log("dd");
             points = currLineCollider.points;
             transform.position = currLineCollider.points[0];
-        }
-
-        if (Input.GetKey(KeyCode.Mouse0))
+        } else if (points.Length < 10 && currLineCollider && failedTries < 5) failedTries++;
+        else if (points.Length < 10 && currLineCollider && failedTries > 5)
         {
-            gameObject.transform.position = Vector3.Lerp(transform.position, points[currPointId], Time.deltaTime / (Vector2.Distance(transform.position, points[currPointId]) * movementSpeed));
-
-            if (Vector2.Distance(gameObject.transform.position, points[currPointId]) < 0.1f)
-            {
-                if (currPointId < points.Length - 1)
-                {
-                    currPointId++;
-                }
-                else if(generatorCollider.Count < 3) //koniec pierwszej linii
-                {
-                    Debug.Log("1st end");
-                    currPointId = 0;
-                    currLineId = 1;
-                    points = currLineCollider.points;
-                    //transform.position = currLineCollider.points[0];
-                    mapGen.GeneratePoints();
-                }
-                else //koniec kazdej kolejnej linii
-                {
-                    Debug.Log("end");
-                    mapGen.GeneratePoints();
-                    currPointId = 0;
-                    points = currLineCollider.points;
-                    //transform.position = currLineCollider.points[0];
-                }
-            }
-
-            SwordHandle(true);
-            //return;
+            failedTries = 0;
+            generatorCollider.RemoveAt(generatorCollider.Count - 1);
+            mapGen.GeneratePoints(true);
         }
+
+            if (Input.GetKey(KeyCode.Mouse0))
+            {
+                gameObject.transform.position = Vector3.Lerp(transform.position, points[currPointId], Time.deltaTime / (Vector2.Distance(transform.position, points[currPointId]) * movementSpeed));
+
+                if (Vector2.Distance(gameObject.transform.position, points[currPointId]) < 0.1f)
+                {
+                    if (currPointId < points.Length - 1)
+                    {
+                        currPointId++;
+                    }
+                    /*else if(generatorCollider.Count < 3) //koniec pierwszej linii
+                    {
+                        Debug.Log("1st end");
+                        currPointId = 0;
+                        currLineId = 1;
+                        points = currLineCollider.points;
+                        //transform.position = currLineCollider.points[0];
+                        mapGen.GeneratePoints();
+                    }*/
+                    else //koniec kazdej linii
+                    {
+                        Debug.Log("end");
+                        points = new Vector2[0];
+                        mapGen.GeneratePoints();
+                        currPointId = 0;
+                        points = currLineCollider.points;
+                        //transform.position = currLineCollider.points[0];
+                    }
+                }
+
+                SwordHandle(true);
+                //return;
+            }
 
         if (Input.GetKeyUp(KeyCode.Mouse0))
         {
@@ -112,6 +124,9 @@ public class Movement : MonoBehaviour
 
     public void UpdateLines(GameObject newLine)
     {
+        //Debug.Log("updateLines: " + newLine.GetComponent<EdgeCollider2D>().pointCount);
+        //StartCoroutine(delay2());
+        Debug.Log("updateLines: " + newLine.GetComponent<EdgeCollider2D>().pointCount);
         if (generatorCollider.Count > 2)
         {
             Destroy(generatorCollider[0]);
@@ -121,6 +136,12 @@ public class Movement : MonoBehaviour
         if(generatorCollider.Count > 1) currLineCollider = generatorCollider[currLineId].GetComponent<EdgeCollider2D>();
 
         //Debug.Log(generatorCollider[currLineId].name + " | " + currLineCollider.pointCount);
+    }
+
+    IEnumerator delay2()
+    {
+        Debug.Log("pause");
+        yield return new WaitForSeconds(1);
     }
 
     public void SwordHandle(bool raise)

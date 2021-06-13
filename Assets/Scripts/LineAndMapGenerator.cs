@@ -12,6 +12,8 @@ public class LineAndMapGenerator : MonoBehaviour
     GameObject coinPrefab;
     [SerializeField]
     GameObject linePrefab;
+    [SerializeField]
+    GameObject enemyPrefab;
 
     [SerializeField]
     float amplitude = Screen.width/2.5f;
@@ -22,14 +24,16 @@ public class LineAndMapGenerator : MonoBehaviour
 
     SpriteShapeController splineObject;
     Vector2 lastPointPosition = new Vector2(0f, -60f);
+    Vector2 archiveStartPoint;
     Vector2 refreshPoint = new Vector2();
 
     void Start()
     {
-        GeneratePoints(10, true);
+        GeneratePoints(false, 10, true);
     }
-    public void GeneratePoints(int count = 10, bool first = false)
+    public void GeneratePoints(bool fixRun = false, int count = 10, bool first = false)
     {
+        archiveStartPoint = lastPointPosition; //an archive for any problems with line generator (especially edge collider)
         Vector2 currentPointPos = lastPointPosition;
 
         GameObject NewLineObject = Instantiate(linePrefab);
@@ -46,6 +50,10 @@ public class LineAndMapGenerator : MonoBehaviour
             {
                 GameObject pointObject = Instantiate(coinPrefab);
                 pointObject.transform.position = currentPointPos;
+            }
+            if (Random.Range(0, 1f) < .2f)
+            {
+                GenerateEnemies(currentPointPos);
             }
 
             positions.Add(currentPointPos);
@@ -74,5 +82,13 @@ public class LineAndMapGenerator : MonoBehaviour
             movement.UpdateLines(NewLineObject);
         }
 
+    }
+    void GenerateEnemies(Vector2 pos)
+    {
+        float xOffset = Random.Range(2f, 7f);
+        GameObject enemy = Instantiate(enemyPrefab);
+
+        if (pos.x > 0) enemy.transform.position = new Vector2(pos.x - xOffset, pos.y);
+        else enemy.transform.position = new Vector2(pos.x + xOffset, pos.y);
     }
 }
