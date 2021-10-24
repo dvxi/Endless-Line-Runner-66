@@ -71,7 +71,8 @@ public class LineAndMapGenerator : MonoBehaviour
             currentPointPos = new Vector2(Random.Range(-amplitude, amplitude), currentPointPos.y + pointsYoffset);
         }
 
-        splineObject.spline = tempSpline;
+        //splineObject.spline = tempSpline; WSZYSTKO SIE JEBIE :)) ale jak ta linijka zadziala to bedzie lux
+
         refreshPoint = positions[positions.Count / 2];
 
         if (first)
