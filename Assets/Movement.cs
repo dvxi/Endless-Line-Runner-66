@@ -34,6 +34,7 @@ public class Movement : MonoBehaviour
     int currPointId = 0;
     float cooldownValue = 0;
     int failedTries = 0;
+    //bool freeSlide = false;
 
     private void Start()
     {
@@ -59,7 +60,7 @@ public class Movement : MonoBehaviour
         prevPos = transform.position;
 
 
-        Debug.Log("lateupdate: " + currLineCollider.pointCount + " id: " + currLineId + " count: " + generatorCollider.Count);
+        //Debug.Log("lateupdate: " + currLineCollider.pointCount + " id: " + currLineId + " count: " + generatorCollider.Count);
         //if (currLineCollider && points.Length != currLineCollider.pointCount)
         if (currLineCollider && currLineCollider.pointCount > 10 && points.Length < 10)
         {

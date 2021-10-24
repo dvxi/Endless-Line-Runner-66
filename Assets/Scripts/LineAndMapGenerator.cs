@@ -16,6 +16,10 @@ public class LineAndMapGenerator : MonoBehaviour
     GameObject enemyPrefab;
 
     [SerializeField]
+    Sprite[] enemySprites;
+    [SerializeField]
+    GameObject[] weaponPrefabs;
+    [SerializeField]
     float amplitude = Screen.width/2.5f;
     [SerializeField]
     float pointsYoffset = 3f;
@@ -83,6 +87,7 @@ public class LineAndMapGenerator : MonoBehaviour
         }
 
     }
+
     void GenerateEnemies(Vector2 pos)
     {
         float xOffset = Random.Range(2f, 7f);
@@ -90,5 +95,29 @@ public class LineAndMapGenerator : MonoBehaviour
 
         if (pos.x > 0) enemy.transform.position = new Vector2(pos.x - xOffset, pos.y);
         else enemy.transform.position = new Vector2(pos.x + xOffset, pos.y);
+
+        int enemyTypeId = Random.Range(0, enemySprites.Length);
+
+        enemy.GetComponent<SpriteRenderer>().sprite = enemySprites[enemyTypeId];
+        GameObject weapon = Instantiate(weaponPrefabs[enemyTypeId], enemy.transform);
+        
+    }
+}
+
+public class Enemy
+{
+    GameObject gm;
+    public Enemy(string enemyType)
+    {
+        switch (enemyType)
+        {
+            case "archman":
+                break;
+            case "magician":
+                break;
+            default:
+                Debug.Log("No such enemy type as " + enemyType);
+                break;
+        }
     }
 }

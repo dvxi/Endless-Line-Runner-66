@@ -192,7 +192,6 @@ namespace UnityEngine.U2D
         public Spline spline
         {
             get { return m_Spline; }
-            set { m_Spline = value; }
         }
 
         public SpriteShape spriteShape
